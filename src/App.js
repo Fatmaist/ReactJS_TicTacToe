@@ -1,65 +1,69 @@
-import * as React from 'react'
-import { useState } from 'react'
+import React from 'react'
+import { createStore } from 'redux'
+import { Provider, connect } from 'react-redux'
 
-function Board() {
-  const [squares, setSquares] = useState(Array(9).fill(null))
-  const [xIsNext, setXIsNext] = useState(true)
-
-  function selectSquare(square) {
-    if (squares[square] || calculateWinner(squares)) {
-      return
-  }
-  const newSquares = squares.slice()
-  newSquares[square] = xIsNext ? 'X' : 'O'
-  setSquares(newSquares)
-  setXIsNext(!xIsNext)
+const initialState = {
+  squares: Array(9).fill(null),
+  xIsNext: true,
 }
 
-  function restart() {
-    setSquares(Array(9).fill(null))
-    setXIsNext(true)
+const gameReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case 'SELECT_SQUARE':
+      const { square } = action
+      const { squares, xIsNext } = state
+      if (squares[square] || calculateWinner(squares)) {
+        return state;
+      }
+      const newSquares = squares.slice()
+      newSquares[square] = xIsNext ? 'X' : 'O'
+      return {
+        ...state,
+        squares: newSquares,
+        xIsNext: !xIsNext,
+      };
+    case 'RESTART':
+      return initialState
+    default:
+      return state
   }
+};
 
+// Redux Store
+const store = createStore(gameReducer)
+
+// React Components
+function Board({ squares, selectSquare, restart }) {
   function renderSquare(i) {
     return (
       <button className="square" onClick={() => selectSquare(i)}>
         {squares[i]}
       </button>
-    );
+    )
   }
 
   return (
     <div>
-        <div className="status">
-            {calculateStatus(calculateWinner(squares), squares, calculateNextValue(squares))}
-        </div>
-        <div className="board">
-            {Array(3)
-            .fill(null)
-            .map((_, row) => (
-                <div key={row} className="board-row">
-                {Array(3)
-                    .fill(null)
-                    .map((_, col) => {
-                    const squareIndex = row * 3 + col
-                    return renderSquare(squareIndex)
-                    })}
-                </div>
-            ))}
-        </div>
-        <button className="restart-button" onClick={restart}>
-            Restart
-        </button>
-        </div>
-    )
-}
-
-function Game() {
-  return (
-    <div >
-      <div >
-        <Board />
+      <div className="status">
+        {calculateStatus(calculateWinner(squares), squares, calculateNextValue(squares))}
       </div>
+      <div className="board">
+        {Array(3)
+          .fill(null)
+          .map((_, row) => (
+            <div key={row} className="board-row">
+              {Array(3)
+                .fill(null)
+                .map((_, col) => {
+                  const squareIndex = row * 3 + col
+                  return renderSquare(squareIndex)
+                })}
+            </div>
+          ))}
+      </div>
+      <button className="restart-button" onClick={restart}>
+        Restart
+      </button>
     </div>
   );
 }
@@ -69,8 +73,8 @@ function calculateStatus(winner, squares, nextValue) {
   return winner
     ? `Winner: ${winner}`
     : squares.every(Boolean)
-      ? `Scratch: Cat's game`
-      : `Next player: ${nextValue}`;
+    ? `Scratch: Cat's game`
+    : `Next player: ${nextValue}`;
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -99,8 +103,33 @@ function calculateWinner(squares) {
   return null;
 }
 
+const mapStateToProps = (state) => ({
+  squares: state.squares,
+})
+
+const mapDispatchToProps = (dispatch) => ({
+  selectSquare: (square) => dispatch({ type: 'SELECT_SQUARE', square }),
+  restart: () => dispatch({ type: 'RESTART' }),
+})
+
+const ConnectedBoard = connect(mapStateToProps, mapDispatchToProps)(Board)
+
+function Game() {
+  return (
+    <div>
+      <div>
+        <ConnectedBoard />
+      </div>
+    </div>
+  )
+}
+
 function App() {
-  return <Game />;
+  return (
+    <Provider store={store}>
+      <Game />
+    </Provider>
+  )
 }
 
 export default App;
