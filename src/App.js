@@ -1,8 +1,9 @@
 import * as React from 'react'
+import { useState } from 'react'
 
 function Board() {
-  const [squares, setSquares] = React.useState(Array(9).fill(null))
-  const [xIsNext, setXIsNext] = React.useState(true)
+  const [squares, setSquares] = useState(Array(9).fill(null))
+  const [xIsNext, setXIsNext] = useState(true)
 
   function selectSquare(square) {
     if (squares[square] || calculateWinner(squares)) {
@@ -29,27 +30,28 @@ function Board() {
 
   return (
     <div>
-      <div >STATUS</div>
-      <div >
-        {renderSquare(0)}
-        {renderSquare(1)}
-        {renderSquare(2)}
-      </div>
-      <div >
-        {renderSquare(3)}
-        {renderSquare(4)}
-        {renderSquare(5)}
-      </div>
-      <div >
-        {renderSquare(6)}
-        {renderSquare(7)}
-        {renderSquare(8)}
-      </div>
-      <button onClick={restart}>
-        restart
-      </button>
-    </div>
-  );
+        <div className="status">
+            {calculateStatus(calculateWinner(squares), squares, calculateNextValue(squares))}
+        </div>
+        <div className="board">
+            {Array(3)
+            .fill(null)
+            .map((_, row) => (
+                <div key={row} className="board-row">
+                {Array(3)
+                    .fill(null)
+                    .map((_, col) => {
+                    const squareIndex = row * 3 + col
+                    return renderSquare(squareIndex)
+                    })}
+                </div>
+            ))}
+        </div>
+        <button className="restart-button" onClick={restart}>
+            Restart
+        </button>
+        </div>
+    )
 }
 
 function Game() {
