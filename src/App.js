@@ -1,6 +1,8 @@
 import React from 'react'
 import { createStore } from 'redux'
 import { Provider, connect } from 'react-redux'
+import './App.css'
+import 'tailwindcss/tailwind.css'
 
 const initialState = {
   squares: Array(9).fill(null),
@@ -35,8 +37,14 @@ const store = createStore(gameReducer)
 // React Components
 function Board({ squares, selectSquare, restart }) {
   function renderSquare(i) {
+    const squareStyle = {
+      width: '100px',
+      height: '100px',
+    }
     return (
-      <button className="square" onClick={() => selectSquare(i)}>
+      <button className="bg-indigo-100 hover:bg-teal-500 text-teal-600 hover:text-white font-bold text-6xl py-4 px-4 rounded x-o-column mt-4 ml-4" 
+      style={squareStyle}
+      onClick={() => selectSquare(i)}>
         {squares[i]}
       </button>
     )
@@ -61,7 +69,7 @@ function Board({ squares, selectSquare, restart }) {
             </div>
           ))}
       </div>
-      <button className="restart-button" onClick={restart}>
+      <button className="bg-orange-400 hover:bg-teal-500 text-white font-bold text-2xl py-2 px-4 rounded restart-button mt-10" onClick={restart}>
         Restart
       </button>
     </div>
@@ -70,11 +78,13 @@ function Board({ squares, selectSquare, restart }) {
 
 // eslint-disable-next-line no-unused-vars
 function calculateStatus(winner, squares, nextValue) {
+  const winnerClass = winner === 'X' ? 'text-yellow-300 text-3xl' : winner === 'O' ? 'text-orange-200 text-3xl' : '';
+
   return winner
-    ? `Winner: ${winner}`
+    ? <span className={`font-bold ${winnerClass}`}>Winner: {winner}</span>
     : squares.every(Boolean)
-    ? `Scratch: Cat's game`
-    : `Next player: ${nextValue}`;
+    ? <span className="text-red-400 font-bold text-3xl">Scratch: Cat's game</span>
+    : <span className="text-white font-bold text-3xl">Next player: <span className="text-yellow-400">{nextValue}</span></span>;
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -116,9 +126,12 @@ const ConnectedBoard = connect(mapStateToProps, mapDispatchToProps)(Board)
 
 function Game() {
   return (
-    <div>
-      <div>
-        <ConnectedBoard />
+    <div className="h-screen flex flex-col justify-center items-center">
+      <h1 className="text-4xl font-bold text-teal-300 mb-2">GAME Tic Tac Toe</h1>
+      <div className="flex items-center justify-center mt-10">
+        <div>
+          <ConnectedBoard />
+        </div>
       </div>
     </div>
   )
@@ -126,9 +139,11 @@ function Game() {
 
 function App() {
   return (
-    <Provider store={store}>
-      <Game />
-    </Provider>
+    <div className="bg-gradient-to-r from-blue-950 to-blue-800 h-screen">
+      <Provider store={store}>
+        <Game />
+      </Provider>
+    </div>
   )
 }
 
